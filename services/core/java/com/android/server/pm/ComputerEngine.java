@@ -316,15 +316,23 @@ public class ComputerEngine implements Computer {
         @NonNull
         public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
             final ArraySet<PackageStateInternal> res = new ArraySet<>();
-            final SharedUserSetting sharedUserSetting =
-                    (SharedUserSetting) mSettings.getSettingLPr(sharedUserAppId);
-            if (sharedUserSetting != null) {
-                final ArraySet<? extends PackageStateInternal> sharedUserPackages =
-                        sharedUserSetting.getPackageStates();
-                for (PackageStateInternal ps : sharedUserPackages) {
-                    res.add(ps);
-                }
+
+            final Object setting = mSettings.getSettingLPr(sharedUserAppId);
+
+            if (!(setting instanceof SharedUserSetting)) {
+                // sharedUserId mismatch or removed
+                return res;
             }
+
+            final SharedUserSetting sharedUserSetting = (SharedUserSetting) setting;
+
+            final ArraySet<? extends PackageStateInternal> sharedUserPackages =
+                    sharedUserSetting.getPackageStates();
+
+            for (PackageStateInternal ps : sharedUserPackages) {
+                res.add(ps);
+            }
+
             return res;
         }
 
